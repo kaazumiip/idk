@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    tools:context=".activities.TaskDetailActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header with Futuristic Styling -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OBJECTIVE DETAILS"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#80FFFF"
+            android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.1"
+            android:paddingBottom="16dp"
+            android:drawablePadding="8dp" />
+
+        <!-- Task Details Panel -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/task_panel_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Task Name -->
+            <TextView
+                android:id="@+id/taskNameTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#E0FFFF"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="16dp"
+                tools:text="Mission Task Name" />
+
+            <!-- Description Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DESCRIPTION"
+                android:textSize="14sp"
+                android:textColor="#7B68EE"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingBottom="4dp" />
+
+            <TextView
+                android:id="@+id/taskDescriptionTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#CCFFFFFF"
+                android:fontFamily="sans-serif-condensed"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="16dp"
+                tools:text="This is a detailed description of the task that needs to be completed." />
+
+            <!-- Category Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CATEGORY: "
+                    android:textSize="14sp"
+                    android:textColor="#7B68EE"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/taskCategoryTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#CCFFFFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    tools:text="Work" />
+            </LinearLayout>
+
+            <!-- Time Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SCHEDULED TIME: "
+                    android:textSize="14sp"
+                    android:textColor="#7B68EE"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/taskTimeTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#CCFFFFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    tools:text="10:00 AM" />
+            </LinearLayout>
+
+            <!-- Duration Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DURATION: "
+                    android:textSize="14sp"
+                    android:textColor="#7B68EE"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/taskDurationTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="#CCFFFFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    tools:text="30 mins" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Action Buttons Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <!-- Start Timer Button with Neon Effect -->
+            <Button
+                android:id="@+id/startTimerButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="INITIATE COUNTDOWN"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/neon_button"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingVertical="12dp"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Additional Actions -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/editTaskButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="EDIT"
+                    android:textSize="14sp"
+                    android:background="@drawable/cyber_button"
+                    android:textColor="#DDFFF7"
+                    android:layout_marginEnd="8dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.05" />
+
+                <Button
+                    android:id="@+id/deleteTaskButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="DELETE"
+                    android:textSize="14sp"
+                    android:background="@drawable/cyber_button"
+                    android:textColor="#DDFFF7"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.05" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Stats Panel -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OBJECTIVE STATISTICS"
+            android:textSize="16sp"
+            android:textColor="#7B68EE"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:paddingBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/task_panel_background"
+            android:padding="16dp">
+
+            <!-- Stats info here - Placeholder -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No previous attempts recorded for this objective. Complete task to generate performance metrics."
+                android:textSize="14sp"
+                android:textColor="#CCFFFFFF"
+                android:fontFamily="sans-serif-condensed" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Header with Futuristic Styling -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/circular_button"
+                android:padding="12dp"
+                android:contentDescription="Back"
+                app:tint="#80FFFF" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="EDIT OBJECTIVE"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#80FFFF"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.1"
+                android:layout_marginStart="12dp"
+                android:drawableStart="@drawable/ic_edit_hologram"
+                android:drawablePadding="8dp" />
+        </LinearLayout>
+
+        <!-- Task ID Display -->
+        <TextView
+            android:id="@+id/taskIdTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TASK ID: #2077-42"
+            android:textSize="14sp"
+            android:textColor="#7B68EE"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.05"
+            android:paddingBottom="8dp" />
+
+        <!-- Task Parameters -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/task_panel_background"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TASK PARAMETERS"
+                android:textSize="16sp"
+                android:textColor="#7B68EE"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingBottom="12dp" />
+
+            <EditText
+                android:id="@+id/taskNameEditText"
+                android:hint="Task Name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/holographic_input"
+                android:padding="12dp"
+                android:textColorHint="#80FFFFFF"
+                android:textColor="#E0FFFF"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.05" />
+
+            <EditText
+                android:id="@+id/taskDescriptionEditText"
+                android:hint="Description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/holographic_input"
+                android:padding="12dp"
+                android:minLines="2"
+                android:layout_marginTop="12dp"
+                android:textColorHint="#80FFFFFF"
+                android:textColor="#E0FFFF"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.05" />
+
+            <Spinner
+                android:id="@+id/taskCategorySpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/holographic_input"
+                android:padding="12dp"
+                android:layout_marginTop="12dp"
+                android:popupBackground="#1A1B2F" />
+        </LinearLayout>
+
+        <!-- Time Parameters -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/task_panel_background"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TIME COORDINATES"
+                android:textSize="16sp"
+                android:textColor="#7B68EE"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingBottom="12dp" />
+
+            <EditText
+                android:id="@+id/taskDurationEditText"
+                android:hint="Duration (e.g., 45 mins)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/holographic_input"
+                android:padding="12dp"
+                android:drawablePadding="8dp"
+                android:textColorHint="#80FFFFFF"
+                android:textColor="#E0FFFF"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.05" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <EditText
+                    android:id="@+id/taskDateEditText"
+                    android:hint="Select Date"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/holographic_input"
+                    android:padding="12dp"
+                    android:focusable="false"
+                    android:drawableStart="@drawable/ic_calendar"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="6dp"
+                    android:textColorHint="#80FFFFFF"
+                    android:textColor="#E0FFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.05" />
+
+                <EditText
+                    android:id="@+id/taskTimeEditText"
+                    android:hint="Select Time"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/holographic_input"
+                    android:padding="12dp"
+                    android:focusable="false"
+                    android:drawableStart="@drawable/ic_time"
+                    android:drawablePadding="8dp"
+                    android:layout_marginStart="6dp"
+                    android:textColorHint="#80FFFFFF"
+                    android:textColor="#E0FFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.05" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Status Parameters -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/task_panel_background"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OBJECTIVE STATUS"
+                android:textSize="16sp"
+                android:textColor="#7B68EE"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingBottom="12dp" />
+
+            <Spinner
+                android:id="@+id/taskStatusSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/holographic_input"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"
+                android:popupBackground="#1A1B2F" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="COMPLETION: "
+                    android:textSize="14sp"
+                    android:textColor="#E0FFFF"
+                    android:fontFamily="sans-serif-condensed" />
+
+                <TextView
+                    android:id="@+id/completionPercentageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="75%"
+                    android:textSize="14sp"
+                    android:textColor="#00FFAA"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/completionSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:progressDrawable="@drawable/neon_seekbar"
+                android:thumb="@drawable/neon_thumb"
+                android:progress="75" />
+        </LinearLayout>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp">
+
+            <Button
+                android:id="@+id/updateTaskButton"
+                android:text="UPDATE OBJECTIVE"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/neon_button"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MODIFICATION HISTORY"
+                android:textSize="16sp"
+                android:textColor="#7B68EE"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:paddingBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/task_panel_background"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CREATED: 05/01/25 14:30"
+                    android:textSize="12sp"
+                    android:textColor="#80FFFF"
+                    android:fontFamily="monospace" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="MODIFIED: 05/01/25 15:45"
+                    android:textSize="12sp"
+                    android:textColor="#80FFFF"
+                    android:fontFamily="monospace"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/lastCompletedTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="COMPLETED: --/--/-- --:--"
+                    android:textSize="12sp"
+                    android:textColor="#00FFAA"
+                    android:fontFamily="monospace"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

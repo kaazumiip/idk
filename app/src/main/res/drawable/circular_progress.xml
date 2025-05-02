@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background Circle -->
+    <item>
+        <shape android:shape="ring"
+            android:thicknessRatio="16"
+            android:useLevel="false">
+            <solid android:color="#1A1B2F" />
+        </shape>
+    </item>
+
+    <!-- Progress Circle -->
+    <item>
+        <shape android:shape="ring"
+            android:thicknessRatio="16"
+            android:useLevel="true">
+            <gradient
+                android:type="sweep"
+                android:startColor="#007B68EE"
+                android:endColor="#7B68EE"
+                android:centerColor="#00FFFF" />
+        </shape>
+    </item>
+</layer-list>

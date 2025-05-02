@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/gradient_background">
+
+    <!-- Welcome / Profile Header with Futuristic Styling -->
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WELCOME, USER_01"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#80FFFF"
+        android:fontFamily="sans-serif-light"
+        android:letterSpacing="0.1"
+        android:paddingBottom="16dp"
+        android:drawableStart="@drawable/ic_hologram"
+        android:drawablePadding="8dp" />
+
+    <!-- Upcoming Tasks with Neon Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MISSION OBJECTIVES"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#7B68EE"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.05"
+        android:paddingBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTasks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/task_panel_background"
+        android:elevation="8dp"
+        android:padding="12dp"
+        android:clipToPadding="false" />
+
+    <!-- Recommendations Section with Holographic Effect -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/holographic_panel">
+
+        <TextView
+            android:id="@+id/recommendationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="NEURAL SUGGESTION PENDING..."
+            android:textColor="#E0FFFF"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-thin"
+            android:letterSpacing="0.05" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="#00FFFF"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/recommendBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="GENERATE NEURAL SUGGESTION"
+            android:background="@drawable/neon_button"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05" />
+    </LinearLayout>
+
+    <!-- Bottom Actions with Futuristic Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:weightSum="3">
+
+        <Button
+            android:id="@+id/btnAddTask"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="ADD TASK"
+            android:textSize="12sp"
+            android:background="@drawable/cyber_button"
+            android:textColor="#DDFFF7"
+            android:layout_marginEnd="8dp"
+            android:drawableTop="@drawable/ic_add_task"
+            android:paddingTop="8dp"
+            android:fontFamily="sans-serif-condensed" />
+
+        <Button
+            android:id="@+id/btnCalendar"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Calendar"
+            android:textSize="12sp"
+            android:background="@drawable/cyber_button"
+            android:textColor="#DDFFF7"
+            android:layout_marginEnd="8dp"
+            android:drawableTop="@drawable/ic_calendar"
+            android:paddingTop="8dp"
+            android:fontFamily="sans-serif-condensed" />
+
+        <Button
+            android:id="@+id/btnProfile"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="PROFILE"
+            android:textSize="12sp"
+            android:background="@drawable/cyber_button"
+            android:textColor="#DDFFF7"
+            android:drawableTop="@drawable/ic_profile"
+            android:paddingTop="8dp"
+            android:fontFamily="sans-serif-condensed" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,146 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    android:id="@+id/taskCardView"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Gradient border effect -->
+        <View
+            android:id="@+id/gradientBorder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/futuristic_gradient_border" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_toStartOf="@+id/buttonsContainer"
+                android:layout_marginEnd="16dp">
+
+                <TextView
+                    android:id="@+id/taskNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Task Name"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#2196F3"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/taskDescriptionTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Task Description"
+                    android:textColor="#333333"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/taskCategoryTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category"
+                        android:textColor="#03A9F4"
+                        android:background="@drawable/category_chip_background"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/taskTimeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Time"
+                        android:textColor="#9C27B0"
+                        android:drawableStart="@drawable/ic_time"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:gravity="center">
+
+                <!-- Edit Button -->
+                <FrameLayout
+                    android:id="@+id/editButtonContainer"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp"
+                    android:background="@drawable/circular_ripple_edit">
+
+                    <ImageView
+                        android:id="@+id/editImageView"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/edit_icon"
+                        app:tint="#4CAF50"
+                        android:alpha="0.85" />
+                </FrameLayout>
+
+                <!-- Delete Button -->
+                <FrameLayout
+                    android:id="@+id/deleteButtonContainer"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/circular_ripple">
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/delete"
+                        app:tint="#FF5252"
+                        android:alpha="0.85" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- Start Button Centered Below the Task Info -->
+            <Button
+                android:id="@+id/startTaskButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start"
+                android:layout_below="@id/buttonsContainer"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
