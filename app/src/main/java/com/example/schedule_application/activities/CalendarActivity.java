@@ -75,11 +75,8 @@ public class CalendarActivity extends AppCompatActivity {
         // Clear previous tasks from layout
         taskListLayout.removeAllViews();
 
-        // Iterate over the tasks and check if they match the selected date
         for (Task task : tasksList) {
-            // Check if task date matches the selected date
             if (isSameDay(task.getTimestamp().toDate(), year, month, day)) {
-                // Create a TextView for each task and add it to the layout
                 TextView taskView = new TextView(this);
                 taskView.setText(task.getName());
                 taskListLayout.addView(taskView);

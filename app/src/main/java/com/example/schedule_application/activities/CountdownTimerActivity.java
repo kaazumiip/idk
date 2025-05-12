@@ -40,7 +40,7 @@ public class CountdownTimerActivity extends AppCompatActivity {
     private FirebaseUser user;
 
 
-    private Task task;  // make it global so we can restart task later if needed
+    private Task task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,6 @@ public class CountdownTimerActivity extends AppCompatActivity {
         }
 
 
-        // 📝 Display task info
         taskNameDisplay.setText(task.getName());
 
         try {

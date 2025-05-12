@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
             finish();
         } else {
-            // User not logged in → Sign in with credentials
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
                         Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
