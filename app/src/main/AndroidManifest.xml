@@ -4,6 +4,12 @@
     <!-- Required for Firebase internet access -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+
+
 
     <application
         android:allowBackup="true"
@@ -15,7 +21,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Schedule_application"
         tools:targetApi="31">
-        <receiver android:name=".receivers.TaskReminderReceiver" android:enabled="true" android:exported="false"/>
+        <receiver android:name=".receivers.TaskReminderReceiver" android:enabled="true" android:exported="true"/>
+
 
         <activity
             android:name=".activities.CountdownTimerActivity"
@@ -45,6 +52,7 @@
             android:name=".activities.LoginActivity"
             android:exported="false"
              />
+
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="true">

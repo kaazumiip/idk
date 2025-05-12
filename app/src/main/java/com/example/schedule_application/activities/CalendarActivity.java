@@ -1,6 +1,7 @@
 package com.example.schedule_application.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.schedule_application.R;
 import com.example.schedule_application.model.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -51,8 +53,12 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void fetchTasksFromFirestore() {
-        // Fetch tasks from Firestore (example with Firebase Firestore)
-        db.collection("tasks")
+        // Assuming you have a current user's UID
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(userId)
+                .collection("tasks")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     tasksList.clear();
@@ -60,9 +66,10 @@ public class CalendarActivity extends AppCompatActivity {
                     tasksList.addAll(fetchedTasks);
                 })
                 .addOnFailureListener(e -> {
-                    // Handle failure if any
+                    Log.e("FirestoreError", "Error fetching tasks: " + e.getMessage());
                 });
     }
+
 
     private void showTasksForSelectedDate(int year, int month, int day) {
         // Clear previous tasks from layout
@@ -74,13 +81,12 @@ public class CalendarActivity extends AppCompatActivity {
             if (isSameDay(task.getTimestamp().toDate(), year, month, day)) {
                 // Create a TextView for each task and add it to the layout
                 TextView taskView = new TextView(this);
-                taskView.setText(task.getName());  // You can customize this view as needed
+                taskView.setText(task.getName());
                 taskListLayout.addView(taskView);
             }
         }
     }
 
-    // Helper function to check if the task's date matches the selected date
     private boolean isSameDay(Date taskDate, int year, int month, int day) {
         // Check if the task's timestamp is on the same day as the selected date
         android.icu.util.Calendar calendar = android.icu.util.Calendar.getInstance();

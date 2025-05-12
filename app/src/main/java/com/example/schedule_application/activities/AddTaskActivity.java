@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ParseException;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -31,8 +32,10 @@ import com.google.firebase.firestore.Query;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.OnTaskClickListener {
 
@@ -40,12 +43,14 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
     private EditText dateEditText, timeEditText;
     private Spinner categorySpinner;
     private Button saveButton;
+    private Button clearButton;
     private RecyclerView recyclerView;
 
     private FirebaseFirestore firestore;
     private FirebaseUser user;
     private Calendar selectedCalendar;
     private TaskAdapter taskAdapter;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +65,14 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
         timeEditText = findViewById(R.id.taskTimeEditText);
         saveButton = findViewById(R.id.saveTaskButton);
         recyclerView = findViewById(R.id.tasksRecyclerView);
+        clearButton = findViewById(R.id.btnClear);
+        clearButton.setOnClickListener(v -> {
+            Intent fakeIntent = new Intent(this, TaskReminderReceiver.class);
+            fakeIntent.putExtra("taskId", "FAKE_TASK_TEST");
+
+            sendBroadcast(fakeIntent);
+        });
+
 
         firestore = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -140,59 +153,88 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
                 new Timestamp(selectedCalendar.getTime()),
                 false
         );
+        task.setStatus("not complete");
 
         firestore.collection("users")
                 .document(user.getUid())
                 .collection("tasks")
-                .add(task)
-                .addOnSuccessListener(documentReference -> {
-                    String generatedId = documentReference.getId();
-                    task.setId(generatedId);
-
-                    documentReference.update("id", generatedId)
-                            .addOnSuccessListener(aVoid -> Log.d("AddTaskActivity", "Task ID updated successfully"));
-
+                .document(task.getId())  // use YOUR generated id here
+                .set(task)
+                .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Task saved successfully", Toast.LENGTH_SHORT).show();
-                    scheduleTaskReminders(selectedCalendar, generatedId);
+                    long millis = task.getTimestamp().toDate().getTime();
+                    scheduleTaskReminders(millis, task.getId());
+                    Log.d("lwiay", "calendar : " +millis);
 
                     clearInputs();
                     fetchTasks();
-
-                    // No need to schedule reminders here, the reminders are calculated and stored in the Task itself
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("AddTaskActivity", "Error saving task: " + e.getMessage());
                 });
+
     }
 
 
-    private void scheduleTaskReminders(Calendar taskCalendar, String taskId) {
-        int[] reminderTimes = {30, 15, 5}; // Reminder times in minutes before the task
+    private void scheduleTaskReminders(long taskTimestamp, String taskId) {
+        int[] reminderTimes = {30, 15, 5, 0};
+
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 
-        // Set reminders for 30, 15, and 5 minutes before the task time
-        for (int minutesBefore : reminderTimes) {
-            Calendar reminderTime = (Calendar) taskCalendar.clone();
-            reminderTime.add(Calendar.MINUTE, -minutesBefore);
-            Log.d("Reminder", "Reminder time (" + minutesBefore + " minutes before): " + reminderTime.getTime());
-
-
-            Intent reminderIntent = new Intent(this, TaskReminderReceiver.class);
-            reminderIntent.putExtra("taskId", taskId);
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, reminderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, reminderTime.getTimeInMillis(), pendingIntent);
+        if (alarmManager == null) {
+            Toast.makeText(this, "AlarmManager unavailable", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // Set a reminder exactly at the task time
-        Intent onTimeReminderIntent = new Intent(this, TaskReminderReceiver.class);
-        onTimeReminderIntent.putExtra("taskId", taskId);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Toast.makeText(this, "Enable exact alarm permission in settings", Toast.LENGTH_LONG).show();
 
-        PendingIntent onTimePendingIntent = PendingIntent.getBroadcast(this, 0, onTimeReminderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                startActivity(intent);
+                return;
+            }
+        }
 
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, taskCalendar.getTimeInMillis(), onTimePendingIntent);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        for (int minutesBefore : reminderTimes) {
+            long reminderTimestamp = taskTimestamp - (minutesBefore * 60 * 1000);
+            long currentTime = System.currentTimeMillis();
+
+            Log.d("ReminderTime", "Reminder for: " + sdf.format(new Date(reminderTimestamp)));
+            Log.d("CurrentTime", "Current time: " + sdf.format(new Date(currentTime)));
+
+            if (reminderTimestamp > currentTime) {
+                Log.d("compare time", "Setting alarm for: " + sdf.format(new Date(reminderTimestamp)));
+
+                Intent reminderIntent = new Intent(this, TaskReminderReceiver.class);
+                reminderIntent.putExtra("taskId", taskId);
+
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                        this,
+                        (taskId + minutesBefore).hashCode(),
+                        reminderIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                );
+
+                try {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, reminderTimestamp, pendingIntent);
+                } catch (SecurityException e) {
+                    Toast.makeText(this, "Permission denied for exact alarm", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.d("compare time", "Skipped past reminder for: " + sdf.format(new Date(reminderTimestamp)));
+            }
+        }
     }
 
 
-    private void fetchTasks() {
+
+
+
+
+        private void fetchTasks() {
         if (user == null) return;
 
         firestore.collection("users")
@@ -228,7 +270,6 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
     }
     @Override
     public void onTaskClick(Task task) {
-        // do s.th when a task is clicked
     }
 
     private void deleteTask(String taskId) {
@@ -237,16 +278,19 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
         firestore.collection("users")
                 .document(user.getUid())
                 .collection("tasks")
-                .document(taskId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
-                    taskAdapter.removeTaskById(taskId);  // Remove from RecyclerView
+                .whereEqualTo("id" , taskId) .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        doc.getReference().delete();
+                        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+                    }
+
                 })
-                .addOnFailureListener(e -> {
-                    Log.e("TaskDelete", "Error deleting task: " + e.getMessage());
-                    Toast.makeText(this, "Error deleting task: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show());
+
+
+
+
     }
 
     private void clearInputs() {

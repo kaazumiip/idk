@@ -2,6 +2,7 @@ package com.example.schedule_application.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -21,14 +22,17 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ProfileView extends AppCompatActivity {
 
@@ -48,26 +52,19 @@ public class ProfileView extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
 
-        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        // Initialize UI components
         initializeViews();
 
-        // Setup recent activity recycler view
         setupRecyclerView();
 
-        // Load user data
         loadUserProfile();
 
-        // Load task statistics
         loadTaskStatistics();
 
-        // Load recent activities
         loadRecentActivities();
 
-        // Setup button click listeners
         setupButtonListeners();
     }
 
@@ -126,8 +123,9 @@ public class ProfileView extends AppCompatActivity {
         // Show loading state
         taskCompletionProgress.setVisibility(View.VISIBLE);
 
-        db.collection("tasks")
-                .whereEqualTo("userId", uid)
+        db.collection("users")
+                .document(uid)
+                .collection("tasks")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -135,8 +133,8 @@ public class ProfileView extends AppCompatActivity {
                         int pending = 0;
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Boolean isCompleted = document.getBoolean("completed");
-                            if (isCompleted != null && isCompleted) {
+                            String status = document.getString("status");
+                            if (status != null && status.equals("Complete")) {
                                 completed++;
                             } else {
                                 pending++;
@@ -150,6 +148,7 @@ public class ProfileView extends AppCompatActivity {
                     }
                 });
     }
+
 
     private void loadRecentActivities() {
         activityLogList.clear();
@@ -173,7 +172,6 @@ public class ProfileView extends AppCompatActivity {
                         }
                     }
 
-                    // If we have no activities, add placeholder message
                     if (activityLogList.isEmpty()) {
                         activityLogList.add(new ActivityLog("No recent activity found", ""));
                     }
@@ -246,8 +244,8 @@ public class ProfileView extends AppCompatActivity {
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(new int[]{
-                Color.parseColor("#00FF9C"),  // Neon green for completed
-                Color.parseColor("#FF427F")  // Neon pink for pending
+                Color.parseColor("#00FF9C"),
+                Color.parseColor("#FF427F")
         });
 
         dataSet.setValueTextSize(14f);
@@ -269,7 +267,25 @@ public class ProfileView extends AppCompatActivity {
 
         btnViewAllTasks.setOnClickListener(v -> {
             Toast.makeText(this, "Redirecting to tasks view", Toast.LENGTH_SHORT).show();
-            // Intent to tasks list activity
+
         });
     }
+    private void logActivityToFirestore(String activityDescription) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        String userId = user.getUid();
+
+        Map<String, Object> log = new HashMap<>();
+        log.put("userId", userId);
+        log.put("activity", activityDescription);
+        log.put("timestamp", new Date());
+
+        FirebaseFirestore.getInstance()
+                .collection("activities")
+                .add(log)
+                .addOnSuccessListener(documentReference -> Log.d("LogActivity", "Activity logged"))
+                .addOnFailureListener(e -> Log.e("LogActivity", "Failed to log activity", e));
+    }
+
 }

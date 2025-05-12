@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.schedule_application.R;
 import com.example.schedule_application.activities.CountdownTimerActivity;
 import com.example.schedule_application.activities.EditActivity;
+import com.example.schedule_application.activities.TaskDetailActivity;
 import com.example.schedule_application.model.Task;
 
 import java.util.List;
@@ -70,9 +71,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
         });
         holder.itemView.setOnClickListener(v -> {
-            if (taskClickListener != null) {
-                taskClickListener.onTaskClick(task);
-            }
+            Log.d("TaskAdapter", "Binding task: " + task.getName() + " | ID: " + task.getId());
+
+            Intent intent = new Intent(context, TaskDetailActivity.class);
+            intent.putExtra("tasks", task);  // Directly send the Task object
+            context.startActivity(intent);
         });
         holder.editButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, EditActivity.class);
@@ -81,10 +84,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         });
         holder.startTaskButton.setOnClickListener(v -> {
             // Create an Intent to start CountdownTimerActivity
-            Intent intent = new Intent(v.getContext(), CountdownTimerActivity.class);
-            // Pass the task object to the next Activity
-            intent.putExtra("tasks", task); // Ensure Task implements Serializable
+//            Intent intent = new Intent(v.getContext(), CountdownTimerActivity.class);
+//            // Pass the task object to the next Activity
+//            intent.putExtra("tasks", task); // Ensure Task implements Serializable
+//            v.getContext().startActivity(intent);
+            Intent intent = new Intent(v.getContext(), TaskDetailActivity.class);
+            intent.putExtra("tasks", task);
             v.getContext().startActivity(intent);
+            Log.e("Starttt", "Activity started"+ v.getContext() );
         });
 
         holder.itemView.setOnClickListener(v -> {

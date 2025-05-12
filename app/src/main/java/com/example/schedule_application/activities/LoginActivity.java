@@ -57,14 +57,24 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(authResult -> {
-                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, DashboardActivity.class)); // your main screen
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            // User is already logged in, just go to dashboard (no need to sign in again)
+            Toast.makeText(this, "Already logged in", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+            finish();
+        } else {
+            // User not logged in → Sign in with credentials
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(authResult -> {
+                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
     }
+
 }
