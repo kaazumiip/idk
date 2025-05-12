@@ -2,7 +2,7 @@ package com.example.schedule_application.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,109 +11,110 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.schedule_application.R;
 import com.example.schedule_application.model.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TaskDetailActivity extends AppCompatActivity {
 
     private TextView taskNameTextView, taskDescriptionTextView, taskCategoryTextView;
     private TextView taskTimeTextView, taskDurationTextView;
     private Button startTimerButton, editTaskButton, deleteTaskButton;
+    private FirebaseFirestore db;
+    private FirebaseUser user;
+
+
     private Task currentTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        db = FirebaseFirestore.getInstance();
+        user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_detail);
 
-        // Initialize views
         initViews();
 
-        // Get task data from intent
-        currentTask = (Task) getIntent().getSerializableExtra("task");
+        currentTask = (Task) getIntent().getSerializableExtra("tasks");
 
         if (currentTask == null) {
-            Toast.makeText(this, "Objective data not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Task data not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Populate UI with task data
-        displayTaskData();
 
-        // Set up button listeners
+        displayTaskData();
         setupButtonListeners();
     }
 
     private void initViews() {
-        // Text views
         taskNameTextView = findViewById(R.id.taskNameTextView);
         taskDescriptionTextView = findViewById(R.id.taskDescriptionTextView);
         taskCategoryTextView = findViewById(R.id.taskCategoryTextView);
         taskTimeTextView = findViewById(R.id.taskTimeTextView);
         taskDurationTextView = findViewById(R.id.taskDurationTextView);
 
-        // Buttons
         startTimerButton = findViewById(R.id.startTimerButton);
         editTaskButton = findViewById(R.id.editTaskButton);
         deleteTaskButton = findViewById(R.id.deleteTaskButton);
     }
 
     private void displayTaskData() {
-        // Set text for all fields
         taskNameTextView.setText(currentTask.getName());
 
-        // Handle description - provide default if empty
-        String description = currentTask.getDescription();
-        if (description == null || description.trim().isEmpty()) {
-            description = "No description provided for this objective.";
-        }
+        String description = (currentTask.getDescription() == null || currentTask.getDescription().trim().isEmpty())
+                ? "No description provided."
+                : currentTask.getDescription();
         taskDescriptionTextView.setText(description);
 
-        // Set category with default if needed
-        String category = currentTask.getCategory();
-        if (category == null || category.trim().isEmpty()) {
-            category = "Uncategorized";
-        }
+        String category = (currentTask.getCategory() == null || currentTask.getCategory().trim().isEmpty())
+                ? "Uncategorized"
+                : currentTask.getCategory();
         taskCategoryTextView.setText(category);
 
-        // Set time and duration
         taskTimeTextView.setText(currentTask.getTime());
         taskDurationTextView.setText(currentTask.getDuration() + " mins");
     }
 
     private void setupButtonListeners() {
-        // Start timer button listener
-        startTimerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Show futuristic toast
-                Toast.makeText(TaskDetailActivity.this,
-                        "INITIATING COUNTDOWN SEQUENCE", Toast.LENGTH_SHORT).show();
 
-                // Launch countdown activity
-                Intent intent = new Intent(TaskDetailActivity.this, CountdownTimerActivity.class);
-                intent.putExtra("task", currentTask);
-                startActivity(intent);
-            }
+        startTimerButton.setOnClickListener(v -> {
+            Toast.makeText(this, "Starting countdown timer", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, CountdownTimerActivity.class);
+            intent.putExtra("tasks", currentTask);
+            startActivity(intent);
         });
 
-        // Edit button listener
-        editTaskButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: Implement edit functionality
-                Toast.makeText(TaskDetailActivity.this,
-                        "EDIT FUNCTION NOT IMPLEMENTED", Toast.LENGTH_SHORT).show();
-            }
+        editTaskButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, EditActivity.class);
+            intent.putExtra("taskId", currentTask.getId());
+            startActivity(intent);
         });
 
-        // Delete button listener
-        deleteTaskButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO: Implement delete functionality
-                Toast.makeText(TaskDetailActivity.this,
-                        "DELETE FUNCTION NOT IMPLEMENTED", Toast.LENGTH_SHORT).show();
-            }
+        deleteTaskButton.setOnClickListener(v -> {
+            db.collection("users").document(user.getUid())
+                    .collection("tasks").whereEqualTo("id", currentTask.getId())
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            doc.getReference().delete();
+                        }
+
+                        Toast.makeText(TaskDetailActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(TaskDetailActivity.this, DashboardActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();  // Finish current activity so it closes
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(TaskDetailActivity.this, "Failed to delete task", Toast.LENGTH_SHORT).show()
+                    );
         });
+
     }
 }
+

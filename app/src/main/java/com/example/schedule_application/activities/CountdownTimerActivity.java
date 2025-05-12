@@ -15,6 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.schedule_application.R;
 import com.example.schedule_application.model.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 
 public class CountdownTimerActivity extends AppCompatActivity {
 
@@ -31,6 +36,9 @@ public class CountdownTimerActivity extends AppCompatActivity {
     private long timeRemainingMillis;
     private boolean isPaused = false;
     private Animation blinkAnimation;
+    private FirebaseFirestore firestore;
+    private FirebaseUser user;
+
 
     private Task task;  // make it global so we can restart task later if needed
 
@@ -38,6 +46,14 @@ public class CountdownTimerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_countdown_timer_activity);
+        firestore = FirebaseFirestore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
 
         taskNameDisplay = findViewById(R.id.taskNameDisplay);
         timerTextView = findViewById(R.id.timerTextView);
@@ -55,13 +71,12 @@ public class CountdownTimerActivity extends AppCompatActivity {
 
         Object obj = getIntent().getSerializableExtra("tasks");
         if (obj instanceof Task) {
-            Task task = (Task) obj;
+            task = (Task) obj;
             Log.d("IntentDebug", "Task received: " + task.getName());
             // Use task here
         } else {
             Log.e("IntentDebug", "Failed to receive Task object");
         }
-
 
 
         // 📝 Display task info
@@ -106,6 +121,9 @@ public class CountdownTimerActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 timeRemainingMillis = millisUntilFinished;
                 updateTimerUI(millisUntilFinished);
+                task.setStatus("Ongoing");
+                updateTaskStatusInFirestore();
+
             }
 
             @Override
@@ -119,6 +137,10 @@ public class CountdownTimerActivity extends AppCompatActivity {
 
                 pauseResumeButton.setText("RESTART");
                 isPaused = true;
+                task.setStatus("Complete");
+                updateTaskStatusInFirestore();
+
+//                logTaskStarted(task.getName());
 
                 Toast.makeText(CountdownTimerActivity.this,
                         "MISSION OBJECTIVE COMPLETED", Toast.LENGTH_LONG).show();
@@ -142,6 +164,11 @@ public class CountdownTimerActivity extends AppCompatActivity {
         isPaused = true;
         pauseResumeButton.setText("RESUME");
         statusTextView.setText("PAUSED");
+//        logTaskPaused(task.getName());
+        task.setStatus("Paused");
+        updateTaskStatusInFirestore();
+
+
         statusTextView.setTextColor(getResources().getColor(android.R.color.holo_orange_light));
     }
 
@@ -150,6 +177,9 @@ public class CountdownTimerActivity extends AppCompatActivity {
         isPaused = false;
         pauseResumeButton.setText("PAUSE");
         statusTextView.setText("IN PROGRESS");
+//        logTaskResumed(task.getName());
+        task.setStatus("Ongoing");
+        updateTaskStatusInFirestore();
         statusTextView.setTextColor(getResources().getColor(android.R.color.holo_blue_bright));
     }
 
@@ -160,4 +190,15 @@ public class CountdownTimerActivity extends AppCompatActivity {
             countDownTimer.cancel();
         }
     }
+
+    private void updateTaskStatusInFirestore() {
+        firestore.collection("users")
+                .document(user.getUid())  // Use correct user ID
+                .collection("tasks")
+                .document(task.getId())  // Use task ID to target correct task
+                .set(task)  // Set the updated task object
+                .addOnSuccessListener(aVoid -> Log.d("TaskStatusUpdate", "Status updated to: " + task.getStatus()))
+                .addOnFailureListener(e -> Log.e("TaskStatusError", "Failed to update status: " + e.getMessage()));
+    }
+
 }

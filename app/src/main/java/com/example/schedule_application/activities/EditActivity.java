@@ -61,20 +61,21 @@ public class EditActivity extends AppCompatActivity {
 
         taskIdTextView.setText("TASK ID: #" + taskId);
 
+
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
                 this,
                 R.layout.spinner_item,
                 new String[]{"Work", "Study", "Exercise", "Relaxation", "Health"}
         );
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
         taskCategorySpinner.setAdapter(categoryAdapter);
 
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(
                 this,
                 R.layout.spinner_item,
-                new String[]{"Not Started", "In Progress", "Completed"}
+                new String[]{ "Ongoing", "Complete"}
         );
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
         taskStatusSpinner.setAdapter(statusAdapter);
 
         // Setup SeekBar sync
@@ -195,7 +196,6 @@ public class EditActivity extends AppCompatActivity {
         task.put("name", taskNameEditText.getText().toString());
         task.put("description", taskDescriptionEditText.getText().toString());
         task.put("duration", taskDurationEditText.getText().toString());
-        task.put("date", taskDateEditText.getText().toString());
         task.put("time", taskTimeEditText.getText().toString());
         task.put("category", taskCategorySpinner.getSelectedItem().toString());
         task.put("status", taskStatusSpinner.getSelectedItem().toString());

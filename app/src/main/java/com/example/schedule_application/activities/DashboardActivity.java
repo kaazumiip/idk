@@ -11,20 +11,30 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.schedule_application.Adapter.TaskAdapter;
 import com.example.schedule_application.R;
 import com.example.schedule_application.model.Task;
-import com.example.schedule_application.utils.GitHubAIClient;
+import com.example.schedule_application.utils.DeepSeekApiService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -42,7 +52,6 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dashboard_activity);
 
-        // Initialize views
         recyclerView = findViewById(R.id.rvTasks);
         recommendationTextView = findViewById(R.id.recommendationText);
         welcomeTextView = findViewById(R.id.tvWelcome);
@@ -52,10 +61,8 @@ public class DashboardActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         recommendBtn = findViewById(R.id.recommendBtn);
 
-        // Placeholder recommendation text
         recommendationTextView.setText("Tap the button to get your recommendations.");
 
-        // Initialize Firebase
         user = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
 
@@ -65,43 +72,38 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         }
 
-        // Set up RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         taskAdapter = new TaskAdapter(this, allTasks, new TaskAdapter.OnTaskClickListener() {
             @Override
-            public void onTaskUpdate(String taskId) {
-                // TODO: Handle task update
-            }
+            public void onTaskUpdate(String taskId) {}
+
             @Override
             public void onTaskClick(Task task) {
                 if (task != null) {
                     Log.d("dashtask", "Task clicked: " + task.getName());
-                    Intent intent = new Intent(DashboardActivity.this, CountdownTimerActivity.class);
+                    Intent intent = new Intent(DashboardActivity.this, TaskDetailActivity.class);
                     intent.putExtra("tasks", task);
                     startActivity(intent);
-                } else {
-                    Log.d("dashtask", "Task is null, cannot pass to intent");
                 }
             }
-
-
 
             @Override
             public void onTaskDelete(String taskId) {
                 db.collection("users").document(user.getUid())
-                        .collection("tasks").document(taskId)
-                        .delete()
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(DashboardActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                        .collection("tasks").whereEqualTo("id", taskId)
+                        .get()
+                        .addOnSuccessListener(queryDocumentSnapshots -> {
+                            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                                doc.getReference().delete();
+                                Toast.makeText(DashboardActivity.this, "Task deleted", Toast.LENGTH_SHORT).show();
+                            }
                             fetchTasksFromFirebase();
                         })
                         .addOnFailureListener(e -> Toast.makeText(DashboardActivity.this, "Failed to delete task", Toast.LENGTH_SHORT).show());
             }
-
         });
         recyclerView.setAdapter(taskAdapter);
 
-        // Set up navigation buttons
         btnAddTask.setOnClickListener(v -> startActivity(new Intent(this, AddTaskActivity.class)));
         btnCalendar.setOnClickListener(v -> startActivity(new Intent(this, CalendarActivity.class)));
         btnProfile.setOnClickListener(v -> startActivity(new Intent(this, ProfileView.class)));
@@ -115,9 +117,6 @@ public class DashboardActivity extends AppCompatActivity {
             requestRecommendationFromGitHubAI();
         });
 
-
-
-        // Fetch name and tasks
         fetchUserName();
         fetchTasksFromFirebase();
     }
@@ -127,19 +126,13 @@ public class DashboardActivity extends AppCompatActivity {
                 .document(user.getUid())
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String name = documentSnapshot.getString("username");
-                        welcomeTextView.setText("Welcome, " + (name != null ? name : "User"));
-                    } else {
-                        welcomeTextView.setText("Welcome!");
-                    }
+                    String name = documentSnapshot.getString("username");
+                    welcomeTextView.setText("Welcome, " + (name != null ? name : "User"));
                 })
                 .addOnFailureListener(e -> welcomeTextView.setText("Welcome!"));
     }
 
     private void fetchTasksFromFirebase() {
-        if (user == null) return;
-
         db.collection("users")
                 .document(user.getUid())
                 .collection("tasks")
@@ -150,24 +143,19 @@ public class DashboardActivity extends AppCompatActivity {
                         return;
                     }
 
-
-                    allTasks.clear();  // clear before adding fresh
-                    List<Task> tasks = new ArrayList<>();
+                    allTasks.clear();
                     for (DocumentSnapshot doc : snapshots) {
                         Task task = doc.toObject(Task.class);
-                        if (task != null) tasks.add(task);
+                        if (task != null) {
+                            allTasks.add(task);
+                        }
                     }
-                    Log.d("Dashboard", "Tasks after fetch: " + tasks.size());
-
-
-                    allTasks.addAll(tasks);  // store all tasks here
-                    taskAdapter.updateTaskList(tasks);
+                    taskAdapter.updateTaskList(allTasks);
                 });
     }
 
     private void requestRecommendationFromGitHubAI() {
-        StringBuilder promptBuilder = new StringBuilder();
-        promptBuilder.append("Based on these tasks, what are some recommendations to prioritize or improve productivity?\n");
+        StringBuilder promptBuilder = new StringBuilder("Based on these tasks, what are some recommendations to prioritize or improve productivity?\n");
         for (Task task : allTasks) {
             promptBuilder.append("- ").append(task.getName());
             if (task.getDescription() != null && !task.getDescription().isEmpty()) {
@@ -177,25 +165,44 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         String prompt = promptBuilder.toString();
-
-        GitHubAIClient.getRecommendation(prompt, new GitHubAIClient.GitHubCallback() {
+        DeepSeekApiService apiService = new DeepSeekApiService();
+        apiService.getRecommendations(prompt, new Callback() {
             @Override
-            public void onSuccess(String result) {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    recommendationTextView.setText(result);
-                });
-            }
-
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(DashboardActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
                     recommendationTextView.setText("Failed to get recommendation. Please try again.");
                 });
             }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    String resultJson = response.body().string();
+                    try {
+                        JSONObject jsonObject = new JSONObject(resultJson);
+                        JSONArray choices = jsonObject.getJSONArray("choices");
+                        String content = choices.getJSONObject(0)
+                                .getJSONObject("message")
+                                .getString("content");
+
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            recommendationTextView.setText(content.trim());
+                        });
+                    } catch (JSONException e) {
+                        runOnUiThread(() -> {
+                            progressBar.setVisibility(View.GONE);
+                            recommendationTextView.setText("Failed to parse recommendation.");
+                        });
+                    }
+                } else {
+                    runOnUiThread(() -> {
+                        progressBar.setVisibility(View.GONE);
+                        recommendationTextView.setText("Recommendation failed.");
+                    });
+                }
+            }
         });
     }
-
 }
