@@ -46,16 +46,6 @@
         </LinearLayout>
 
         <!-- Task ID Display -->
-        <TextView
-            android:id="@+id/taskIdTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TASK ID: #2077-42"
-            android:textSize="14sp"
-            android:textColor="#7B68EE"
-            android:fontFamily="monospace"
-            android:letterSpacing="0.05"
-            android:paddingBottom="8dp" />
 
         <!-- Task Parameters -->
         <LinearLayout
@@ -102,14 +92,29 @@
                 android:fontFamily="sans-serif-condensed"
                 android:letterSpacing="0.05" />
 
-            <Spinner
-                android:id="@+id/taskCategorySpinner"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/holographic_input"
-                android:padding="12dp"
+                android:hint="Category"
                 android:layout_marginTop="12dp"
-                android:popupBackground="#1A1B2F" />
+                app:boxStrokeColor="#7B68EE"
+                app:boxBackgroundColor="#1A1A2E"
+                app:boxStrokeWidth="2dp"
+                app:boxBackgroundMode="outline">
+
+                <AutoCompleteTextView
+                    android:id="@+id/category"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/holographic_input"
+                    android:padding="12dp"
+                    android:completionThreshold="1"
+                    android:textColorHint="#80FFFFFF"
+                    android:textColor="#E0FFFF"
+                    android:fontFamily="sans-serif-condensed"
+                    android:letterSpacing="0.05"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <!-- Time Parameters -->
@@ -124,7 +129,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TIME COORDINATES"
+                android:text="Time"
                 android:textSize="16sp"
                 android:textColor="#7B68EE"
                 android:fontFamily="sans-serif-medium"
@@ -267,50 +272,7 @@
                 android:letterSpacing="0.05"
                 android:layout_marginBottom="12dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="MODIFICATION HISTORY"
-                android:textSize="16sp"
-                android:textColor="#7B68EE"
-                android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.05"
-                android:paddingBottom="8dp" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/task_panel_background"
-                android:padding="12dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="CREATED: 05/01/25 14:30"
-                    android:textSize="12sp"
-                    android:textColor="#80FFFF"
-                    android:fontFamily="monospace" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="MODIFIED: 05/01/25 15:45"
-                    android:textSize="12sp"
-                    android:textColor="#80FFFF"
-                    android:fontFamily="monospace"
-                    android:layout_marginTop="4dp" />
-
-                <TextView
-                    android:id="@+id/lastCompletedTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="COMPLETED: --/--/-- --:--"
-                    android:textSize="12sp"
-                    android:textColor="#00FFAA"
-                    android:fontFamily="monospace"
-                    android:layout_marginTop="4dp" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 </ScrollView>

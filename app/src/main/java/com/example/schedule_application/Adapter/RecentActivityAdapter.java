@@ -1,6 +1,5 @@
 package com.example.schedule_application.Adapter;
 
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.schedule_application.R;
 import com.example.schedule_application.model.ActivityLog;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAdapter.ActivityViewHolder> {
 
@@ -33,15 +35,20 @@ public class RecentActivityAdapter extends RecyclerView.Adapter<RecentActivityAd
     @Override
     public void onBindViewHolder(@NonNull ActivityViewHolder holder, int position) {
         ActivityLog currentItem = activityLogs.get(position);
+
         holder.activityText.setText(currentItem.getActivity());
 
-        if (!currentItem.getTimestamp().isEmpty()) {
-            holder.timestampText.setText(currentItem.getTimestamp());
+        Date timestamp = currentItem.getTimestamp();
+        if (timestamp != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
+            String formattedDate = sdf.format(timestamp);
+            holder.timestampText.setText(formattedDate);
             holder.timestampText.setVisibility(View.VISIBLE);
         } else {
             holder.timestampText.setVisibility(View.GONE);
         }
     }
+
 
     @Override
     public int getItemCount() {

@@ -1,28 +1,33 @@
 package com.example.schedule_application.model;
 
 
-public class ActivityLog {
-    private String activity;
-    private String timestamp;
+import com.google.firebase.Timestamp;
 
-    public ActivityLog(String activity, String timestamp) {
+import java.util.Date;
+
+public class ActivityLog {
+    private String userId;
+    private String activity;
+    private Date timestamp;
+    public ActivityLog() {} // Required for Firestore
+
+    public ActivityLog(String userId, String activity, Date timestamp) {
+        this.userId = userId;
         this.activity = activity;
         this.timestamp = timestamp;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getActivity() {
         return activity;
     }
 
-    public void setActivity(String activity) {
-        this.activity = activity;
-    }
-
-    public String getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
 }
+

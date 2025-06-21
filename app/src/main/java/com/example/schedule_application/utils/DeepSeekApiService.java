@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class DeepSeekApiService {
     // New OpenRouter API key
-    private static final String API_KEY = "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";
+    private static final String API_KEY = "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";
 
     // OpenRouter API URLs
     private static final String BASE_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -30,7 +30,6 @@ public class DeepSeekApiService {
         jsonMap.put("temperature", 0.7);
         jsonMap.put("max_tokens", 150);
 
-        // Simplify the query to use fewer tokens
         String conciseQuery = "Based on these tasks, provide a brief productivity tip (max 100 words):\n" + userQuery;
 
         List<Map<String, String>> messages = new ArrayList<>();

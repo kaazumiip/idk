@@ -25,14 +25,22 @@ import com.example.schedule_application.activities.CountdownTimerActivity;
 import com.example.schedule_application.activities.EditActivity;
 import com.example.schedule_application.activities.TaskDetailActivity;
 import com.example.schedule_application.model.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
     private Context context;
     private List<Task> taskList;
     private OnTaskClickListener taskClickListener;
+    private FirebaseFirestore db;
+    private FirebaseUser user;
+
 
 
 
@@ -41,6 +49,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         this.context = context;
         this.taskList = taskList;
         this.taskClickListener = taskClickListener;
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        db = FirebaseFirestore.getInstance();
     }
     public TaskAdapter(Context context, List<Task> taskList) {
         this.context = context;
@@ -68,37 +78,30 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
 
 
+
             }
         });
         holder.itemView.setOnClickListener(v -> {
             Log.d("TaskAdapter", "Binding task: " + task.getName() + " | ID: " + task.getId());
 
             Intent intent = new Intent(context, TaskDetailActivity.class);
-            intent.putExtra("tasks", task);  // Directly send the Task object
+            intent.putExtra("tasks", task);
             context.startActivity(intent);
         });
         holder.editButton.setOnClickListener(v -> {
             Intent intent = new Intent(context, EditActivity.class);
             intent.putExtra("taskId", task.getId());
+
             context.startActivity(intent);
         });
-        holder.startTaskButton.setOnClickListener(v -> {
-            // Create an Intent to start CountdownTimerActivity
-//            Intent intent = new Intent(v.getContext(), CountdownTimerActivity.class);
-//            // Pass the task object to the next Activity
-//            intent.putExtra("tasks", task); // Ensure Task implements Serializable
-//            v.getContext().startActivity(intent);
-            Intent intent = new Intent(v.getContext(), TaskDetailActivity.class);
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, TaskDetailActivity.class);
             intent.putExtra("tasks", task);
-            v.getContext().startActivity(intent);
-            Log.e("Starttt", "Activity started"+ v.getContext() );
+            context.startActivity(intent);
         });
 
-        holder.itemView.setOnClickListener(v -> {
-            if (taskClickListener != null) {
-                taskClickListener.onTaskUpdate(task.getId());
-            }
-        });
+        // Optional: Hide or disable the start button if not used
+        holder.startTaskButton.setVisibility(View.GONE);
 
 
         // Animation 1 — Gradient rotation
@@ -182,11 +185,26 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         }
     }
 
+
     // Interfaced
     public interface OnTaskClickListener {
         void onTaskUpdate(String taskId);
         void onTaskDelete(String taskId);
         void onTaskClick(Task task);  // Triggered when task is clicked
 
+    }
+    private void logActivityToFirestore(String message) {
+        Map<String, Object> activity = new HashMap<>();
+        activity.put("timestamp", System.currentTimeMillis());
+        activity.put("description", message);
+
+        db.collection("users")
+                .document(user.getUid())
+                .collection("activities")
+                .add(activity)
+                .addOnSuccessListener(documentReference ->
+                        Log.d("DashboardActivity", "Activity logged: " + message))
+                .addOnFailureListener(e ->
+                        Log.e("DashboardActivity", "Failed to log activity", e));
     }
 }

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.ParseException;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -31,25 +32,30 @@ import com.google.firebase.firestore.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.OnTaskClickListener {
 
     private EditText nameEditText, descriptionEditText, durationEditText;
     private EditText dateEditText, timeEditText;
-    private Spinner categorySpinner;
+    private AutoCompleteTextView categorySpinner;
     private Button saveButton;
-    private Button clearButton;
     private RecyclerView recyclerView;
-
     private FirebaseFirestore firestore;
     private FirebaseUser user;
     private Calendar selectedCalendar;
     private TaskAdapter taskAdapter;
+    private List<String> categories;
+
+    private ArrayAdapter<String> categoryAdapter;
+    Task task;
 
 
     @Override
@@ -59,37 +65,58 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
 
         nameEditText = findViewById(R.id.taskNameEditText);
         descriptionEditText = findViewById(R.id.taskDescriptionEditText);
-        categorySpinner = findViewById(R.id.taskCategorySpinner);
+        categorySpinner = findViewById(R.id.etCategory);
         durationEditText = findViewById(R.id.taskDurationEditText);
         dateEditText = findViewById(R.id.taskDateEditText);
         timeEditText = findViewById(R.id.taskTimeEditText);
         saveButton = findViewById(R.id.saveTaskButton);
         recyclerView = findViewById(R.id.tasksRecyclerView);
-        clearButton = findViewById(R.id.btnClear);
-        clearButton.setOnClickListener(v -> {
-            Intent fakeIntent = new Intent(this, TaskReminderReceiver.class);
-            fakeIntent.putExtra("taskId", "FAKE_TASK_TEST");
-
-            sendBroadcast(fakeIntent);
-        });
-
 
         firestore = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
         selectedCalendar = Calendar.getInstance();
 
+        categories = new ArrayList<>(Arrays.asList("Work", "Study", "Exercise", "Relaxation", "Health"));
+        categoryAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                categories
+        );
+        if (getIntent().hasExtra("taskCategory")) {
+            String category = getIntent().getStringExtra("taskCategory");
+            categorySpinner.setText(category);
+
+            if (!category.isEmpty() && !categories.contains(category)) {
+                categories.add(category);
+                categoryAdapter.notifyDataSetChanged();
+            }
+        }
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         taskAdapter = new TaskAdapter(this, new ArrayList<>(), this);
         recyclerView.setAdapter(taskAdapter);
 
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                this,
-                R.layout.spinner_item, // for selected item view
-                new String[]{"Work", "Study", "Exercise", "Relaxation", "Health"}
-        );
-        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
-        categorySpinner.setAdapter(categoryAdapter);
 
+        categorySpinner.setAdapter(categoryAdapter);
+        categorySpinner.setThreshold(0);
+
+
+        categorySpinner.setOnClickListener(v -> categorySpinner.showDropDown());
+        categorySpinner.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                categorySpinner.showDropDown();
+            } else {
+                String input = categorySpinner.getText().toString().trim();
+                Log.d("CategoryInput", "User typed: " + input);
+                if (!input.isEmpty() && !categories.contains(input)) {
+                    categories.add(input);
+                    Log.d("CategoryList", "New category added: " + input);
+                    categoryAdapter.notifyDataSetChanged();
+                    categorySpinner.dismissDropDown();
+                    categorySpinner.post(() -> categorySpinner.showDropDown());
+                }
+            }
+        });
 
 
         dateEditText.setOnClickListener(v -> {
@@ -125,6 +152,20 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
             timePicker.show();
         });
 
+        Intent intent = getIntent();
+        if (intent.hasExtra("taskName")) {
+            nameEditText.setText(intent.getStringExtra("taskName"));
+        }
+        if (intent.hasExtra("taskDescription")) {
+            descriptionEditText.setText(intent.getStringExtra("taskDescription"));
+        }
+        if (intent.hasExtra("taskCategory")) {
+            String category = intent.getStringExtra("taskCategory");
+
+            categorySpinner.setText(category);
+        }
+
+
         saveButton.setOnClickListener(v -> saveTask());
         fetchTasks();
     }
@@ -132,7 +173,7 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
     private void saveTask() {
         String name = nameEditText.getText().toString().trim();
         String description = descriptionEditText.getText().toString().trim();
-        String category = categorySpinner.getSelectedItem().toString().trim();
+        String category = categorySpinner.getText().toString().trim();
         String time = timeEditText.getText().toString().trim();
         String duration = durationEditText.getText().toString().trim();
 
@@ -143,8 +184,7 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
 
         if (user == null) return;
 
-        // Create the task without the need for reminder parameters
-        Task task = new Task(
+        task = new Task(
                 name,
                 description,
                 time,
@@ -158,13 +198,14 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
         firestore.collection("users")
                 .document(user.getUid())
                 .collection("tasks")
-                .document(task.getId())  // use YOUR generated id here
+                .document(task.getId())
                 .set(task)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Task saved successfully", Toast.LENGTH_SHORT).show();
+                    logActivityToFirestore("Created task: " + task.getName());
                     long millis = task.getTimestamp().toDate().getTime();
                     scheduleTaskReminders(millis, task.getId());
-                    Log.d("lwiay", "calendar : " +millis);
+                    Log.d("lwiay", "calendar : " + millis);
 
                     clearInputs();
                     fetchTasks();
@@ -230,11 +271,7 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
     }
 
 
-
-
-
-
-        private void fetchTasks() {
+    private void fetchTasks() {
         if (user == null) return;
 
         firestore.collection("users")
@@ -268,20 +305,31 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
     public void onTaskDelete(String taskId) {
         deleteTask(taskId);
     }
+
     @Override
     public void onTaskClick(Task task) {
     }
 
     private void deleteTask(String taskId) {
+
         if (user == null) return;
 
         firestore.collection("users")
                 .document(user.getUid())
                 .collection("tasks")
-                .whereEqualTo("id" , taskId) .get()
+                .whereEqualTo("id", taskId).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        String taskName = doc.getString("name");
                         doc.getReference().delete();
+                        Log.d("houtchanmonyroth", "deleteTask: " + taskName );
+                        Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+
+                        if (taskName != null) {
+                            logActivityToFirestore("Deleted task: '" + taskName + "'");
+                        } else {
+                            logActivityToFirestore("Deleted a task (name unknown)");
+                        }
                         Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
                     }
 
@@ -289,17 +337,38 @@ public class AddTaskActivity extends AppCompatActivity implements TaskAdapter.On
                 .addOnFailureListener(e -> Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show());
 
 
-
-
     }
 
     private void clearInputs() {
         nameEditText.setText("");
         descriptionEditText.setText("");
-        categorySpinner.setSelection(0);
+        categorySpinner.setText("");
         durationEditText.setText("");
         dateEditText.setText("");
         timeEditText.setText("");
         selectedCalendar = Calendar.getInstance();
     }
+
+    private void logActivityToFirestore(String activityDescription) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        String userId = user.getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> activityData = new HashMap<>();
+        activityData.put("activity", activityDescription);
+        activityData.put("timestamp", new Date());
+
+        db.collection("users")
+                .document(userId)
+                .collection("activities")  //
+                .add(activityData)
+                .addOnSuccessListener(documentReference ->
+                        Log.d("ActivityLog", "Activity logged"))
+                .addOnFailureListener(e ->
+                        Log.e("ActivityLog", "Failed to log activity", e));
+    }
+
+
 }

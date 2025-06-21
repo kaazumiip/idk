@@ -132,11 +132,12 @@ public class CountdownTimerActivity extends AppCompatActivity {
 
                 statusTextView.setText("COMPLETED");
                 statusTextView.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+
                 statusTextView.startAnimation(blinkAnimation);
 
                 pauseResumeButton.setText("RESTART");
                 isPaused = true;
-                task.setStatus("Complete");
+                task.setStatus("Completed");
                 updateTaskStatusInFirestore();
 
 //                logTaskStarted(task.getName());

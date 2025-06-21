@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.schedule_application.R;
-import com.example.schedule_application.activities.DashboardActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -32,10 +31,9 @@ public class LoginActivity extends AppCompatActivity {
         signupRedirect = findViewById(R.id.signupRedirect);
         mAuth = FirebaseAuth.getInstance();
 
-        // Check if the user is already logged in
+        // 🔁 Auto-login if already signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is already logged in, so move directly to DashboardActivity
             startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
             finish();
         }
@@ -57,23 +55,15 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.isEmailVerified()) {
-            // User is already logged in, just go to dashboard (no need to sign in again)
-            Toast.makeText(this, "Already logged in", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-            finish();
-        } else {
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnSuccessListener(authResult -> {
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        }
+        // 🔐 Sign in the user
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+                    finish(); // Prevent returning to login
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Login failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
-
 }

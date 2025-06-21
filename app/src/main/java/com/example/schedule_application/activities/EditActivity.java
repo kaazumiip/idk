@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -20,6 +21,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -28,9 +31,13 @@ import java.util.Map;
 public class EditActivity extends AppCompatActivity {
 
     private EditText taskNameEditText, taskDescriptionEditText, taskDurationEditText, taskDateEditText, taskTimeEditText;
-    private Spinner taskCategorySpinner, taskStatusSpinner;
     private SeekBar completionSeekBar;
-    private TextView completionPercentageText, taskIdTextView, lastCompletedTextView;
+    private AutoCompleteTextView categorySpinner;
+    private Spinner taskStatusSpinner;
+
+    private ArrayAdapter<String> categoryAdapter;
+    private ArrayList<String> categories;
+    private TextView completionPercentageText;
     private Button updateTaskButton;
 
     private FirebaseFirestore db;
@@ -46,37 +53,65 @@ public class EditActivity extends AppCompatActivity {
         taskId = getIntent().getStringExtra("taskId");
 
         taskNameEditText = findViewById(R.id.taskNameEditText);
+        categorySpinner = findViewById(R.id.category); // make sure this ID exists in your XML
         taskDescriptionEditText = findViewById(R.id.taskDescriptionEditText);
         taskDurationEditText = findViewById(R.id.taskDurationEditText);
         taskDateEditText = findViewById(R.id.taskDateEditText);
         taskTimeEditText = findViewById(R.id.taskTimeEditText);
-        taskCategorySpinner = findViewById(R.id.taskCategorySpinner);
-        taskStatusSpinner = findViewById(R.id.taskStatusSpinner);
-        completionSeekBar = findViewById(R.id.completionSeekBar);
+        completionSeekBar=findViewById(R.id.completionSeekBar);
+        taskStatusSpinner =findViewById(R.id.taskStatusSpinner);
+
         completionPercentageText = findViewById(R.id.completionPercentageText);
-        taskIdTextView = findViewById(R.id.taskIdTextView);
-        lastCompletedTextView = findViewById(R.id.lastCompletedTextView);
+
         updateTaskButton = findViewById(R.id.updateTaskButton);
 
 
-        taskIdTextView.setText("TASK ID: #" + taskId);
 
 
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+
+        categories = new ArrayList<>(Arrays.asList("Work", "Study", "Exercise", "Relaxation", "Health"));
+        categoryAdapter = new ArrayAdapter<>(
                 this,
-                R.layout.spinner_item,
-                new String[]{"Work", "Study", "Exercise", "Relaxation", "Health"}
+                android.R.layout.simple_dropdown_item_1line,
+                categories
         );
-        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
-        taskCategorySpinner.setAdapter(categoryAdapter);
+
+
+
+
+
+        categorySpinner.setAdapter(categoryAdapter);
+        categorySpinner.setThreshold(0);
+
+
+        categorySpinner.setOnClickListener(v -> categorySpinner.showDropDown());
+        categorySpinner.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                categorySpinner.showDropDown();
+            } else {
+                String input = categorySpinner.getText().toString().trim();
+                Log.d("CategoryInput", "User typed: " + input);
+                if (!input.isEmpty() && !categories.contains(input)) {
+                    categories.add(input);
+                    Log.d("CategoryList", "New category added: " + input);
+                    categoryAdapter.notifyDataSetChanged();
+                    categorySpinner.dismissDropDown();
+                    categorySpinner.post(() -> categorySpinner.showDropDown());
+                }
+             }
+            });
+
+        ArrayList<String> statusOptions = new ArrayList<>(Arrays.asList("Not Started", "In Progress", "Completed"));
 
         ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(
                 this,
                 R.layout.spinner_item,
-                new String[]{ "Ongoing", "Complete"}
+                statusOptions
         );
-        categoryAdapter.setDropDownViewResource(R.layout.spinner_item);
+        statusAdapter.setDropDownViewResource(R.layout.spinner_dropdown_white_text);
         taskStatusSpinner.setAdapter(statusAdapter);
+
+
 
         // Setup SeekBar sync
         completionSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -137,6 +172,7 @@ public class EditActivity extends AppCompatActivity {
             return;
         }
 
+
         String userId = currentUser.getUid();
 
         db.collection("users")
@@ -158,18 +194,25 @@ public class EditActivity extends AppCompatActivity {
                             completionPercentageText.setText(completion.intValue() + "%");
                         }
 
-                        ArrayAdapter<String> categoryAdapter = (ArrayAdapter<String>) taskCategorySpinner.getAdapter();
                         ArrayAdapter<String> statusAdapter = (ArrayAdapter<String>) taskStatusSpinner.getAdapter();
                         String category = snapshot.getString("category");
                         String status = snapshot.getString("status");
 
-                        if (category != null && categoryAdapter != null)
-                            taskCategorySpinner.setSelection(categoryAdapter.getPosition(category));
+                        if (category != null && !category.isEmpty()) {
+                            categorySpinner.setText(category);
+
+                            if (!categories.contains(category)) {
+                                categories.add(category);
+                                categoryAdapter.notifyDataSetChanged();
+                            }
+                        }
+
+
                         if (status != null && statusAdapter != null)
                             taskStatusSpinner.setSelection(statusAdapter.getPosition(status));
 
-                        lastCompletedTextView.setText("COMPLETED: " + snapshot.getString("completedAt"));
                     }
+
                 })
                 .addOnFailureListener(e -> {
                     Log.e("EditActivity", "Failed to load task", e);
@@ -197,7 +240,7 @@ public class EditActivity extends AppCompatActivity {
         task.put("description", taskDescriptionEditText.getText().toString());
         task.put("duration", taskDurationEditText.getText().toString());
         task.put("time", taskTimeEditText.getText().toString());
-        task.put("category", taskCategorySpinner.getSelectedItem().toString());
+        task.put("category", categorySpinner.getText().toString().trim());
         task.put("status", taskStatusSpinner.getSelectedItem().toString());
         task.put("completion", completionSeekBar.getProgress());
         task.put("modifiedAt", Timestamp.now());

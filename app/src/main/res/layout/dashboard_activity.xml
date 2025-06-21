@@ -7,7 +7,6 @@
     android:padding="16dp"
     android:background="@drawable/gradient_background">
 
-    <!-- Welcome / Profile Header with Futuristic Styling -->
     <TextView
         android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
@@ -26,7 +25,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MISSION OBJECTIVES"
+        android:text="TODAY TASK"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="#7B68EE"
@@ -45,25 +44,39 @@
         android:clipToPadding="false" />
 
     <!-- Recommendations Section with Holographic Effect -->
+    <!-- Recommendations Container with Toggle -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/recommendationContainer"
         android:orientation="vertical"
-        android:padding="20dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/holographic_panel">
+        android:background="@drawable/holographic_panel"
+        android:padding="16dp"
+        android:layout_marginTop="16dp">
 
+        <!-- Keep toggle button and other controls at top -->
         <TextView
-            android:id="@+id/recommendationText"
+            android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="NEURAL SUGGESTION PENDING..."
-            android:textColor="#E0FFFF"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:paddingBottom="8dp"
+            android:text="TASK RECOMMENDATION"
+            android:textColor="#7B68EE"
             android:textSize="18sp"
-            android:fontFamily="sans-serif-thin"
-            android:letterSpacing="0.05" />
+            android:textStyle="bold" />
 
+        <!-- RecyclerView for recommendations below toggle -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecommendations"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:paddingTop="8dp"
+            android:clipToPadding="false" />
+
+
+        <!-- Progress Bar -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -71,7 +84,18 @@
             android:layout_gravity="center"
             android:indeterminateTint="#00FFFF"
             android:visibility="gone" />
+        <TextView
+            android:id="@+id/emptyMessageTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No recommendations yet."
+            android:gravity="center"
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:visibility="gone" />
 
+
+        <!-- Generate Button -->
         <Button
             android:id="@+id/recommendBtn"
             android:layout_width="match_parent"
@@ -83,6 +107,8 @@
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.05" />
     </LinearLayout>
+
+
 
     <!-- Bottom Actions with Futuristic Buttons -->
     <LinearLayout

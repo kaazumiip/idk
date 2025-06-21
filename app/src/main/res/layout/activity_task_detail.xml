@@ -203,31 +203,6 @@
         </LinearLayout>
 
         <!-- Stats Panel -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="OBJECTIVE STATISTICS"
-            android:textSize="16sp"
-            android:textColor="#7B68EE"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.05"
-            android:paddingBottom="8dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/task_panel_background"
-            android:padding="16dp">
-
-            <!-- Stats info here - Placeholder -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="No previous attempts recorded for this objective. Complete task to generate performance metrics."
-                android:textSize="14sp"
-                android:textColor="#CCFFFFFF"
-                android:fontFamily="sans-serif-condensed" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>
